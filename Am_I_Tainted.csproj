@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageId>AmITainted</PackageId>
+    <Authors>topit</Authors>
+    <Product>Am I Tainted</Product>
+    <Description>a program that checks if you have any tainted roblox accounts</Description>
+  </PropertyGroup>
+
+</Project>
