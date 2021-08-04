@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Drawing;
 
 namespace Am_I_Tainted
 {
@@ -22,7 +19,7 @@ namespace Am_I_Tainted
         public static void Main(string[] args)
         {
             Console.CursorVisible = false;
-            Console.Title = "Am I Tainted? v1.0.0";
+            Console.Title = "Am I Tainted? v1.1.0";
             Console.ForegroundColor = ConsoleColor.Green;
 
 
@@ -31,7 +28,7 @@ namespace Am_I_Tainted
             
             var localpath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string robloxpath = localpath + "\\Roblox";
-
+            bool archive = false;
 
             
             if (Directory.Exists(robloxpath))
@@ -94,6 +91,20 @@ namespace Am_I_Tainted
                 Console.ReadKey();
                 Environment.Exit(0);
             }
+            if (Directory.Exists(robloxpath + "\\logs\\archive"))
+            {
+                DisplayInfo("Found archive folder", InfoType.Success);
+                DisplayInfo("Taints are stored inside of .ini files inside of the archive folder.", InfoType.Info);
+                DisplayInfo("Files outside of the archive folder are still scanned anyways.", InfoType.Info);
+                archive = true;
+
+            }
+            else
+            {
+                DisplayInfo("Couldn't find archive folder", InfoType.Success);
+                DisplayInfo("Taints are stored inside of .ini files inside of the archive folder.", InfoType.Info);
+                DisplayInfo("Files outside of the archive folder are still scanned anyways.", InfoType.Info);
+            }
             Console.WriteLine("Press any key to begin. . .");
             Console.ReadKey(true);
 
@@ -102,7 +113,7 @@ namespace Am_I_Tainted
 
             Console.Clear();
 
-            DisplayInfo($"Scanning files...", InfoType.Info);
+            DisplayInfo($"Scanning files [logs]...", InfoType.Info);
 
             var logs = Directory.GetFiles(logspath);
             logs_length = logs.Length;
@@ -119,6 +130,7 @@ namespace Am_I_Tainted
                     tainted_files.Add(file);
                     Console.CursorTop = 2;
                     DisplayInfo($"Taints detected: {files_tainted}", InfoType.Info);
+                    System.Threading.Thread.Sleep(1);
                 }
                 files_scanned++;
 
@@ -128,13 +140,50 @@ namespace Am_I_Tainted
                 
             }
             Console.CursorTop = 0;
-            DisplayInfo($"Finished!             ", InfoType.Success);
-            Console.CursorTop = 3;
+            DisplayInfo($"Finished scanning logs!             ", InfoType.Success);
+            if (archive)
+            {
+                files_scanned = 0;
+                files_tainted = 0;
+
+                logspath += "\\archive";
+                Console.CursorTop = 4;
+
+                DisplayInfo($"Scanning files [archive]...", InfoType.Info);
+
+                logs = Directory.GetFiles(logspath);
+                logs_length = logs.Length;
+                DisplayInfo($"Files scanned: {files_scanned}/{logs_length}", InfoType.Info);
+                DisplayInfo($"Taints detected: {files_tainted}", InfoType.Info);
+
+
+                foreach (string file in Directory.GetFiles(logspath))
+                {
+                    string text = File.ReadAllText(file);
+                    if (tainted.Match(text.ToLower()).Success)
+                    {
+                        files_tainted++;
+                        tainted_files.Add(file);
+                        Console.CursorTop = 6;
+                        DisplayInfo($"Taints detected: {files_tainted}", InfoType.Info);
+                        System.Threading.Thread.Sleep(1);
+                    }
+                    files_scanned++;
+
+                    Console.CursorTop = 5;
+                    DisplayInfo($"Files scanned: {files_scanned}/{logs_length}", InfoType.Info);
+
+
+                }
+                Console.CursorTop = 4;
+                DisplayInfo($"Finished scanning archive!                   ", InfoType.Success);
+                Console.CursorTop = 8;
+            }
             Console.WriteLine();
 
             foreach (string file in tainted_files) 
             {
-                DisplayInfo($"Tainted file: {file.Split("logs\\")[1]}", InfoType.Tainted);
+                DisplayInfo($"Tainted file: {file.Split("logs\\")[1]}", InfoType.Taint);
             }
 
             Console.WriteLine("Press any key to close. . .");
@@ -173,11 +222,11 @@ namespace Am_I_Tainted
                     Console.Write("] ");
                     break;
 
-                case InfoType.Tainted:
+                case InfoType.Taint:
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write("[");
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.Write("TAINTED");
+                    Console.Write("TAINT");
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.Write("] ");
                     break;
@@ -190,7 +239,7 @@ namespace Am_I_Tainted
             Info,
             Success,
             Error,
-            Tainted
+            Taint
 
         }
     }
